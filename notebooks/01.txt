@@ -1,0 +1,196 @@
+What we did in the notebook
+
+1. Loaded and audited the district dataset
+
+Loaded the ASAR district Excel data.
+Confirmed 616 rows × 39 columns initially.
+Found 612 unique districts after handling missingness/usable records.
+Checked duplicate district names and identified cases like Aurangabad, Bilaspur, Hamirpur, and Pratapgarh appearing in different states.
+Examined missing values.
+
+2. Selected the 3 variables for peer profiling
+
+We deliberately narrowed the model to:
+
+bb_availaibility → Availability
+district_annual_per100 → Collection
+percentage_voluntary_district → Voluntary Donation
+
+Why? These were the quality-verified indicators we decided were defensible for the profiling model.
+
+We did not use the ASAR assessment score as a predictor because it is the composite performance measure we're trying to look beyond.
+
+3. Checked the distributions
+You examined:
+
+Mean
+Standard deviation
+Minimum/maximum
+Outliers
+
+For example, availability had a maximum of 49.29, while collection per 100 had a maximum of 51.24, showing substantial outliers.
+
+4. Checked correlations
+
+The important result:
+
+Variables	Correlation
+Availability ↔ Collection	0.602
+Availability ↔ Voluntary	0.055
+Collection ↔ Voluntary	0.017
+Voluntary ↔ ASAR score	0.392
+Collection ↔ ASAR score	0.190
+Availability ↔ ASAR score	0.064
+
+This helped establish that the three operational indicators aren't simply measuring the exact same thing.
+
+5. Cleaned the modeling data
+
+You removed the one district that couldn't be used for the three-variable model.
+
+Result:
+
+615 districts × 3 features
+
+Then standardized the features:
+
+Means: [0. 0. 0.]
+Std:   [1. 1. 1.]
+
+That's important because availability, collection and voluntary percentage have completely different numerical scales.
+
+6. Built the peer-matching system
+
+This was the major ML step.
+
+For every district, we searched for other districts with similar ASAR performance, using the frozen ±3-point ASAR window and then identified comparable districts using the feature-space distance.
+
+The resulting matrices were:
+
+Distance matrix: (615, 21)
+Index matrix:    (615, 21)
+
+So each district had its comparable peer set.
+
+7. Calculated peer-relative gaps
+
+For every district we compared its actual value against its peers.
+
+Example:
+
+Chickballapur
+Availability gap   = -0.0447
+Collection gap     =  0.0144
+Voluntary gap      =  2.705
+
+This answers:
+
+"Compared with districts performing similarly overall, where is this district unusually weak or strong?"
+
+That's fundamentally different from simply saying:
+
+"This district's ASAR score is 55."
+
+8. Converted gaps into standardized relative gaps
+
+We then represented the differences using peer-relative standardized values.
+
+For example:
+
+Jalpaiguri
+
+Availability = -1.294
+Collection   = +1.821
+Voluntary    = -0.099
+
+So its strongest negative deviation is Availability.
+
+9. Generated the primary gap diagnosis
+
+We then assigned each district its largest negative peer-relative deviation.
+
+Example:
+
+District	Primary gap	Z
+Haveri	Collection	-0.293
+Kodagu	Voluntary Donation	-0.633
+Medak	Collection	-0.493
+Jalpaiguri	Availability	-1.294
+Sirsa	Availability	-1.235
+Ajmer	Availability	-1.401
+
+We also flagged particularly large deviations as significant gaps.
+
+10. Built a second/global method as a validation check
+
+This was important.
+
+We didn't trust the first method blindly.
+
+We compared:
+
+Peer-based method
+
+vs.
+
+Global method
+
+And got:
+
+Method agreement: 96.59%
+
+That's a very strong consistency check.
+
+Meaning the primary-gap diagnosis generally doesn't depend heavily on the exact implementation.
+
+11. Tested sensitivity to peer-window size
+
+We also checked whether changing the peer selection from the frozen K=20 setting would radically change results.
+
+Results:
+
+K=10 vs K=20 → 75.93% agreement
+K=30 vs K=20 → 84.23% agreement
+
+So the model isn't perfectly invariant to peer size, but the diagnosis remains reasonably consistent.
+
+So what did this notebook actually prove?
+
+The notebook moved the project from:
+
+"Let's cluster Indian districts into blood-bank types."
+
+to a much more defensible:
+
+"For each district, identify which blood-bank service dimension is unusually weak compared with districts having similar overall performance."
+
+And the ML component is now:
+
+Standardized feature representation → distance-based peer matching → peer-relative gap detection → gap classification.
+
+The pipeline we've built
+ASAR District Data
+        ↓
+Data Audit
+        ↓
+Select defensible indicators
+        ↓
+Handle missing data
+        ↓
+Standardize 3 features
+        ↓
+Find comparable districts
+        ↓
+Peer-relative distance
+        ↓
+Calculate gaps
+        ↓
+Standardize gaps
+        ↓
+Identify primary gap
+        ↓
+Validate against global method
+        ↓
+Sensitivity test
+        ↓
+District Profile
