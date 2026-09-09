@@ -77,6 +77,7 @@ export default function PeerGroupTable({ district }: PeerGroupTableProps) {
             placeholder="Filter peer districts..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
+            aria-label="Filter peer districts"
             className="w-full bg-slate-900 border border-slate-700/80 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-400 focus:outline-none focus:border-teal-500"
           />
         </div>

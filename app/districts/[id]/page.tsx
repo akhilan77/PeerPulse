@@ -19,10 +19,41 @@ import {
   TrendingUp,
 } from 'lucide-react';
 
+import type { Metadata } from 'next';
+
 interface DistrictProfileProps {
   params: Promise<{
     id: string;
   }>;
+}
+
+export async function generateMetadata({ params }: DistrictProfileProps): Promise<Metadata> {
+  const resolvedParams = await params;
+  const district = getDistrictById(resolvedParams.id);
+  if (!district) {
+    return {
+      title: 'District Not Found | PeerPulse AI',
+    };
+  }
+
+  const title = `${district.district_name}, ${district.state_name} — Blood-Banking Peer Assessment`;
+  const description = `Peer-relative blood bank assessment for ${district.district_name} (${district.state_name}). Identified primary gap: ${district.primary_gap} (${district.primary_gap_z.toFixed(2)}σ) relative to 20 nearest statistical peers.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'article',
+      url: `https://peerpulse.ai/districts/${district.id}`,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
+  };
 }
 
 export async function generateStaticParams() {

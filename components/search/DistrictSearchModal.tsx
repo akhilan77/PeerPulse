@@ -79,6 +79,7 @@ export default function DistrictSearchModal({ isOpen, onClose, districts }: Dist
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
+            aria-label="Search any of 615 districts or 35 states"
             className="w-full bg-transparent text-slate-100 placeholder-slate-400 text-sm sm:text-base outline-none"
           />
           {query && (

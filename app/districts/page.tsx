@@ -217,6 +217,7 @@ export default function DistrictExplorerPage() {
               type="text"
               placeholder="Search district or state..."
               value={searchQuery}
+              aria-label="Search district or state by name"
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
@@ -229,6 +230,7 @@ export default function DistrictExplorerPage() {
           <div className="relative">
             <select
               value={selectedState}
+              aria-label="Filter districts by state"
               onChange={(e) => {
                 setSelectedState(e.target.value);
                 setCurrentPage(1);
